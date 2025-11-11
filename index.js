@@ -31,8 +31,8 @@ async function run() {
 
     app.get('/collections', async(req, res)=>{
 
-      const result=await dataCollection.find().toArray()
-
+      const result=await dataCollection.find().sort({created_at: -1}).toArray()
+      
       res.send(result)
     })
 
@@ -49,11 +49,38 @@ async function run() {
     app.post('/collections', async(req, res)=>{
 
       const data = req.body;
+      data.created_at= new Date()
 
       const result = await dataCollection.insertOne(data)
       res.send({success: true, result})
     })
 
+    app.put('/collections/:id', async(req, res)=>{
+      const { id } = req.params;
+      const data = req.body;
+      const filter = {_id: new ObjectId(id)}
+      const update = {
+        $set: data
+      }
+      const result = await dataCollection.updateOne(filter, update)
+
+      res.send({
+        success: true,
+        result
+      })
+    })
+
+    app.delete('/collections/:id', async(req, res)=>{
+      const { id } = req.params;
+      
+      const filter = {_id: new ObjectId(id)}
+      const result =await dataCollection.deleteOne(filter)
+
+      res.send({
+        success: true,
+        result
+      })
+    })
 
 
 
