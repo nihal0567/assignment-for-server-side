@@ -1,14 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config()
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const app = express()
-const port =  3000
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const app = express();
+const port = 3000;
 
-
-app.use(cors())
-app.use(express.json())
-
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.ue9fgze.mongodb.net/?appName=Cluster0`;
 
@@ -18,90 +16,97 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
   try {
     await client.connect();
 
-    const db = client.db('assignment-server-side')
-    const dataCollection = db.collection('collections')
-    
+    const db = client.db("assignment-server-side");
+    const dataCollection = db.collection("collections");
+    const balanceCollection = db.collection("balanceCollections")
 
-    app.get('/collections', async(req, res)=>{
+    app.get("/collections", async (req, res) => {
+       const result=await dataCollection.find().sort({created_at: -1}).toArray()
+  
+       res.send(result);
+    });
 
-      const result=await dataCollection.find().sort({created_at: -1}).toArray()
+    app.get("/balanceCollection", async(req, res)=>{
       
-      res.send(result)
     })
+    
+    // app.get("/collections", async (req, res) => {
+    //   const email = req.query.email;
+    //   const query = {};
+    //   if (email) {
+    //     query.email = email;
+    //   }
+    //   const cursor = dataCollection.find(query);
+    //   const result = await cursor.toArray();
+    // });
 
-    app.get('/collections/:id', async(req, res)=>{
+    app.get("/collections/:id", async (req, res) => {
       const { id } = req.params;
-      const result = await dataCollection.findOne({_id: new ObjectId(id)})
-
+      const result = await dataCollection.findOne({ _id: new ObjectId(id) });
       res.send({
         success: true,
-        result
-      })
-    })
-    
-    app.post('/collections', async(req, res)=>{
+        result,
+      });
+    });
 
+    app.post("/collections", async (req, res) => {
       const data = req.body;
-      data.created_at= new Date()
+      data.created_at = new Date();
 
-      const result = await dataCollection.insertOne(data)
-      res.send({success: true, result})
-    })
+      const result = await dataCollection.insertOne(data);
+      res.send({ success: true, result });
+    });
 
-    app.put('/collections/:id', async(req, res)=>{
+    app.put("/collections/:id", async (req, res) => {
       const { id } = req.params;
       const data = req.body;
-      const filter = {_id: new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) };
       const update = {
-        $set: data
-      }
-      const result = await dataCollection.updateOne(filter, update)
+        $set: data,
+      };
+      const result = await dataCollection.updateOne(filter, update);
 
       res.send({
         success: true,
-        result
-      })
-    })
+        result,
+      });
+    });
 
-    app.delete('/collections/:id', async(req, res)=>{
+    app.delete("/collections/:id", async (req, res) => {
       const { id } = req.params;
-      
-      const filter = {_id: new ObjectId(id)}
-      const result =await dataCollection.deleteOne(filter)
+
+      const filter = { _id: new ObjectId(id) };
+      const result = await dataCollection.deleteOne(filter);
 
       res.send({
         success: true,
-        result
-      })
-    })
-
-
-
+        result,
+      });
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
-  //  await client.close();
+    //  await client.close();
   }
 }
 run().catch(console.dir);
 
-
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
