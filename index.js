@@ -28,20 +28,12 @@ async function run() {
     const balanceCollection = db.collection("balanceCollections")
 
     app.get("/collections", async (req, res) => {
+      const projectFields = {created_at: 1, date : 1, amount : 1}
        const result=await dataCollection.find().sort({created_at: 1}).toArray()
   
        res.send(result);
     });
-    app.get("/collections", async (req, res) => {
-       const result=await dataCollection.find().sort({date: 1}).toArray()
-  
-       res.send(result);
-    });
-    app.get("/collections", async (req, res) => {
-       const result=await dataCollection.find().sort({amount: 1}).toArray()
-  
-       res.send(result);
-    });
+
 
     app.get("/balanceCollection", async(req, res)=>{
       
