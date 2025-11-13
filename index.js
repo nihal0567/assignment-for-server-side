@@ -53,6 +53,11 @@ async function run() {
         })
     })
 
+    app.get("/collections-email", async(req, res)=>{
+      const email = req.query.email
+      const result = await dataCollection.find({email:email}).toArray()
+      res(result)
+    })
 
     app.get("/collections", async (req, res) => {
       const cursor = dataCollection.find(
