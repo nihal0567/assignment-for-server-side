@@ -21,41 +21,48 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+   // await client.connect();
 
     const db = client.db("assignment-server-side");
     const dataCollection = db.collection("collections");
-    const balanceCollection = db.collection("balanceCollections")
+   
 
     app.get("/collections", async (req, res) => {
-      const projectFields = {created_at: 1}
-       const result=await dataCollection.find().sort({created_at: 1}).toArray()
-  
-       res.send(result);
+      const projectFields = { created_at: 1 };
+      const result = await dataCollection
+        .find()
+        .sort({ created_at: 1 })
+        .toArray();
+
+      res.send(result);
     });
 
-    app.get('/collections', async (req, res) => {
-    const result = await dataCollection.find().toArray()
+        app.get('/collections', async (req, res) => {
+        const result = await dataCollection.find().toArray()
 
-    const totalIncome = result.filter(item=> item.situation === "Income").reduce((sum, item)=> sum + item.amount, 0)
+        const totalIncome = result.filter(item=> item.situation === "income").reduce((sum, item)=> sum + parseFloat(item.amount), 0)
 
-    const totalExpense = result.filter(item=> item.situation === "Expense").reduce((sum, item)=> sum + item.amount, 0)
+        const totalExpense = result.filter(item=> item.situation === "expense").reduce((sum, item)=> sum + parseFloat(item.amount), 0)
+    console.log(totalBalance, totalIncome,totalExpense);
+        const totalBalance= totalIncome - totalExpense
+        res.send({
+            totalBalance,
+            totalIncome,
+            totalExpense,
 
-    const totalBalance= totalIncome - totalExpense
-    res.send({
-        totalBalance,
-        totalIncome,
-        totalExpense,
-        
+        })
     })
-})
 
-    app.get("/collections", async(req, res)=>{
-      const cursor = dataCollection.find({}, { projection: { situation : 1, _id: 0}})
-      const result = await cursor.toArray()
-      res.send(result)
-    })
-    
+
+    app.get("/collections", async (req, res) => {
+      const cursor = dataCollection.find(
+        {},
+        { projection: { situation: 1, _id: 0 } }
+      );
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/collections", async (req, res) => {
       // const email = req.query.email;
       // const query = {};
@@ -66,7 +73,7 @@ async function run() {
       console.log(req.query);
       const cursor = dataCollection.find(query);
       const result = await cursor.toArray();
-      res.send(result)
+      res.send(result);
     });
 
     app.get("/collections/:id", async (req, res) => {
@@ -114,7 +121,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+  //  await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
