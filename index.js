@@ -28,26 +28,46 @@ async function run() {
     const balanceCollection = db.collection("balanceCollections")
 
     app.get("/collections", async (req, res) => {
-      const projectFields = {created_at: 1, date : 1, amount : 1}
+      const projectFields = {created_at: 1}
        const result=await dataCollection.find().sort({created_at: 1}).toArray()
   
        res.send(result);
     });
 
+    app.get('/collections', async (req, res) => {
+    const result = await dataCollection.find().toArray()
 
-    app.get("/balanceCollection", async(req, res)=>{
-      
+    const totalIncome = result.filter(item=> item.situation === "Income").reduce((sum, item)=> sum + item.amount, 0)
+
+    const totalExpense = result.filter(item=> item.situation === "Expense").reduce((sum, item)=> sum + item.amount, 0)
+
+    const totalBalance= totalIncome - totalExpense
+    res.send({
+        totalBalance,
+        totalIncome,
+        totalExpense,
+        
+    })
+})
+
+    app.get("/collections", async(req, res)=>{
+      const cursor = dataCollection.find({}, { projection: { situation : 1, _id: 0}})
+      const result = await cursor.toArray()
+      res.send(result)
     })
     
-    // app.get("/collections", async (req, res) => {
-    //   const email = req.query.email;
-    //   const query = {};
-    //   if (email) {
-    //     query.email = email;
-    //   }
-    //   const cursor = dataCollection.find(query);
-    //   const result = await cursor.toArray();
-    // });
+    app.get("/collections", async (req, res) => {
+      // const email = req.query.email;
+      // const query = {};
+      // if (email) {
+      //   query.email = email;
+      // }
+
+      console.log(req.query);
+      const cursor = dataCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+    });
 
     app.get("/collections/:id", async (req, res) => {
       const { id } = req.params;
