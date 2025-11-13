@@ -37,13 +37,13 @@ async function run() {
       res.send(result);
     });
 
-        app.get('/collections', async (req, res) => {
+        app.get('/collections-amount', async (req, res) => {
         const result = await dataCollection.find().toArray()
 
         const totalIncome = result.filter(item=> item.situation === "income").reduce((sum, item)=> sum + parseFloat(item.amount), 0)
 
         const totalExpense = result.filter(item=> item.situation === "expense").reduce((sum, item)=> sum + parseFloat(item.amount), 0)
-    console.log(totalBalance, totalIncome,totalExpense);
+ 
         const totalBalance= totalIncome - totalExpense
         res.send({
             totalBalance,
